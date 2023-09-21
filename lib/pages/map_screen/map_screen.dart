@@ -73,13 +73,13 @@ class _MapScreenState extends State<MapScreen> {
       context: context,
       builder: (context) {
         return Container(
-          height: 700,
+          height: 800,
           color: AppColors.blackColor,
           child: Center(
             child: OpenStreetMapSearchAndPick(
               center: LatLong(latitude, longitude),
               buttonColor: AppColors.blackColor,
-              buttonText: 'Set Current Location',
+              buttonText: ' Current Location',
               onPicked: (pickedData) async {
                 Navigator.pop(context);
                 setState(() {

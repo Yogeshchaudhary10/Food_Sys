@@ -191,27 +191,27 @@ class _LoginFormClassState extends State<SignInScreen> {
               height: Dimension.height20,
             ),
             //mobile sigin
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: MaterialButton(
-                color: AppColors.kButtonColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const LoginWithPhoneNumber()));
-                },
-                child: const Text(
-                  "Signin with phone",
-                  style: TextStyle(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.all(8.0),
+            //   child: MaterialButton(
+            //     color: AppColors.kButtonColor,
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(10),
+            //     ),
+            //     onPressed: () {
+            //       Navigator.push(
+            //           context,
+            //           MaterialPageRoute(
+            //               builder: (context) => const LoginWithPhoneNumber()));
+            //     },
+            //     child: const Text(
+            //       "Signin with phone",
+            //       style: TextStyle(
+            //         color: Colors.white,
+            //       ),
+            //     ),
+            //   ),
+            // ),
             SizedBox(
               height: Dimension.height10 / 4,
             ),
@@ -227,7 +227,8 @@ class _LoginFormClassState extends State<SignInScreen> {
                     if (userCredential != null) {
                       // Successful sign-in
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => const HomePage()),
+                        MaterialPageRoute(
+                            builder: (context) => const HomePage()),
                       );
                     } else {
                       // Sign-in failed

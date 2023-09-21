@@ -227,9 +227,11 @@ class SignFormClassState extends State<SignFormClass> {
                           .createUserWithEmailAndPassword(
                               email: email.text.toString(),
                               password: password.text.toString())
-                          .then((value) {
+                          .then((value) async {
                         String userId = value.user!.uid;
-
+// Set the display name for the newly created user
+                        await value.user!
+                            .updateProfile(displayName: username.text);
                         fireStore.doc(userId).set({
                           'name': username.text,
                           'email': email.text,

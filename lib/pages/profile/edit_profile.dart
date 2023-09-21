@@ -1,8 +1,8 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:food_ordering_app/pages/profile/profile_screen.dart';
 import 'package:food_ordering_app/resources/color_manager.dart';
 import 'package:food_ordering_app/resources/dimension.dart';
 import 'package:food_ordering_app/resources/routes_manager.dart';
@@ -148,19 +148,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
               locationController,
             ),
             SizedBox(height: Dimension.height10 * 3.5),
-            ElevatedButton(
-              style: ButtonStyle(
-                backgroundColor: MaterialStateProperty.all<Color>(
-                    Colors.black), // Set the background color to black
-                foregroundColor: MaterialStateProperty.all<Color>(
-                    Colors.white), // Set the text color to white
-              ),
-              onPressed: saveChangesToFirestore,
-              child: Text(
-                "Save Changes",
-                style: TextStyle(
-                  fontSize: Dimension.font16,
-                  fontWeight: FontWeight.bold,
+            InkWell(
+              onTap: () {
+                Navigator.pop(context, Routes.profileScreen);
+              },
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                      Colors.black), // Set the background color to black
+                  foregroundColor: MaterialStateProperty.all<Color>(
+                      Colors.white), // Set the text color to white
+                ),
+                onPressed: saveChangesToFirestore,
+                child: Text(
+                  "Save Changes",
+                  style: TextStyle(
+                    fontSize: Dimension.font16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -213,12 +218,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
       final location = locationController.text;
       log("userid ${user!.uid}");
 
-      final userRef = _firestore.collection('users').doc(user!.uid);
+      final userRef = _firestore.collection('users').doc(user.uid);
 
       await userRef.update({
         'fullName': fullName,
         'location': location,
       });
+
+      // Update the user's display name here
+      await user.updateProfile(displayName: fullName);
+      await user.reload(); // Reload the user for the changes to take effect
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
