@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:food_ordering_app/pages/profile/profile_screen.dart';
 import 'package:food_ordering_app/resources/color_manager.dart';
 import 'package:food_ordering_app/resources/dimension.dart';
 import 'package:food_ordering_app/resources/routes_manager.dart';

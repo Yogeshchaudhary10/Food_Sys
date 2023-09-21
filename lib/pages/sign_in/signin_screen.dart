@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:food_ordering_app/pages/home_page/home_page_navigation_bar.dart';
-import 'package:food_ordering_app/pages/sign_in/sigin_with_phone/login_with_phone.dart';
 import 'package:food_ordering_app/pages/utils/utility.dart';
 import 'package:food_ordering_app/resources/dimension.dart';
 import 'package:google_sign_in/google_sign_in.dart';
