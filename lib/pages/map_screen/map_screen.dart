@@ -1,6 +1,12 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:food_ordering_app/resources/color_manager.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:open_street_map_search_and_pick/open_street_map_search_and_pick.dart';
 
 class MapScreen extends StatefulWidget {
@@ -14,61 +20,178 @@ class _MapScreenState extends State<MapScreen> {
   String location = "Pick  a location";
   double latitude = 27.700769, longitude = 85.300140;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  MapController mapController = MapController();
+  LatLng initialPosition = LatLng(27.700769, 85.300140);
+  late List<Placemark> locationName;
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(
-      //   backgroundColor: AppColors.orange,
-      //   title: Text(
-      //     "Address Page",
-      //     style: TextStyle(color: AppColors.blackColor),
-      //   ),
-      //   centerTitle: true,
-      //   leading: IconButton(
-      //     onPressed: () {
-      //       // Navigator.pushNamed(context, Routes.cartPage);
-      //       Navigator.of(context)
-      //           .push(MaterialPageRoute(builder: (context) => CombinedPage()));
-      //     },
-      //     icon: Icon(
-      //       Icons.arrow_back_ios,
-      //       color: AppColors.blackColor,
-      //     ),
-      //   ),
-      // ),
-      body: Center(
-        child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // InkWell(
-              //     child: Text(location),
-              //     onTap: () {
-              //       _showModal(context);
-              //     }),
-              // InkWell(
-              //     child: Text(location),
-              //     onTap: () {
-              //       _showModal(context);
-              //     }),
-              ElevatedButton(
-                onPressed: () {
-                  _showModal(context);
-                },
-                style: ButtonStyle(
-                  backgroundColor:
-                      MaterialStateProperty.all<Color>(AppColors.blackColor),
-                ),
-                child: Text(location),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void initState() {
+    super.initState();
+    _handleLocationPermission();
+    getLocation();
   }
 
-  void _showModal(BuildContext context) {
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Location services are disabled. Please enable the services')));
+      return false;
+    }
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Location permissions are denied')));
+        return false;
+      }
+    }
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'Location permissions are permanently denied, we cannot request permissions.')));
+      return false;
+    }
+    return true;
+  }
+
+  getLocation() async {
+    try {
+      locationName = await placemarkFromCoordinates(
+          initialPosition.latitude, initialPosition.longitude);
+
+      print(locationName.first.toString());
+    } catch (e) {
+      print('Error fetching location: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: [
+      FlutterMap(
+        mapController: mapController,
+        options: MapOptions(
+          center: initialPosition,
+          zoom: 13,
+          onTap: (tapPosition, point) {
+            _handleTap(point);
+          },
+        ),
+        children: [
+          TileLayer(
+            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            userAgentPackageName: 'com.example.app',
+          ),
+          MarkerLayer(
+            markers: [
+              Marker(
+                width: 30.0,
+                height: 30.0,
+                point: initialPosition,
+                builder: (ctx) => SizedBox(
+                  child: const Icon(
+                    Icons.location_on,
+                    size: 30.0,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+      Positioned(
+        left: 50,
+        top: 200,
+        child: Container(
+          height: 40,
+          width: 200,
+          child: Card(
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Text(
+                    locationName.first.locality.toString(),
+                  ),
+                  Text(
+                    locationName.first.subLocality.toString(),
+                  ),
+                ]),
+          ),
+        ),
+      )
+    ]);
+
+    //  Scaffold(
+    //   // appBar: AppBar(
+    //   //   backgroundColor: AppColors.orange,
+    //   //   title: Text(
+    //   //     "Address Page",
+    //   //     style: TextStyle(color: AppColors.blackColor),
+    //   //   ),
+    //   //   centerTitle: true,
+    //   //   leading: IconButton(
+    //   //     onPressed: () {
+    //   //       // Navigator.pushNamed(context, Routes.cartPage);
+    //   //       Navigator.of(context)
+    //   //           .push(MaterialPageRoute(builder: (context) => CombinedPage()));
+    //   //     },
+    //   //     icon: Icon(
+    //   //       Icons.arrow_back_ios,
+    //   //       color: AppColors.blackColor,
+    //   //     ),
+    //   //   ),
+    //   // ),
+    //   body: Center(
+    //     child: Container(
+    //       child: Column(
+    //         mainAxisAlignment: MainAxisAlignment.center,
+    //         children: [
+    //           // InkWell(
+    //           //     child: Text(location),
+    //           //     onTap: () {
+    //           //       _showModal(context);
+    //           //     }),
+    //           // InkWell(
+    //           //     child: Text(location),
+    //           //     onTap: () {
+    //           //       _showModal(context);
+    //           //     }),
+    //           ElevatedButton(
+    //             onPressed: () {
+    //               _showModal(context, (value) {
+    //                 latitude = value.latitude;
+    //                 longitude = value.longitude;
+    //                 print(latitude.toString() + "value" + longitude.toString());
+    //               });
+    //             },
+    //             style: ButtonStyle(
+    //               backgroundColor:
+    //                   MaterialStateProperty.all<Color>(AppColors.blackColor),
+    //             ),
+    //             child: Text(location),
+    //           ),
+    //         ],
+    //       ),
+    //     ),
+    //   ),
+    // );
+  }
+
+  void _handleTap(LatLng location) {
+    setState(() {
+      initialPosition = location;
+      print(initialPosition);
+      getLocation();
+    });
+  }
+
+  void _showModal(BuildContext context, Function(LatLong) value) {
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -77,16 +200,21 @@ class _MapScreenState extends State<MapScreen> {
           color: AppColors.blackColor,
           child: Center(
             child: OpenStreetMapSearchAndPick(
+              onGetCurrentLocationPressed: Future.value,
               center: LatLong(latitude, longitude),
               buttonColor: AppColors.blackColor,
               buttonText: ' Current Location',
-              onPicked: (pickedData) async {
-                Navigator.pop(context);
-                setState(() {
-                  location = pickedData.address;
-                  latitude = pickedData.latLong.latitude;
-                  longitude = pickedData.latLong.longitude;
-                });
+              onPicked: (pickedData) {
+                print(pickedData.address);
+                // await value(pickedData.latLong);
+                if (mounted) {
+                  Navigator.pop(context);
+                }
+                // setState(() {
+                location = pickedData.toString();
+                latitude = pickedData.latLong.latitude;
+                longitude = pickedData.latLong.longitude;
+                // });
 
                 // try {
                 //   final user = FirebaseAuth.instance.currentUser;

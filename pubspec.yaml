@@ -61,6 +61,10 @@ dependencies:
 
   #Khalti Payment gateway
   khalti_flutter: ^2.2.1
+  flutter_map: ^3.1.0
+  latlong2: ^0.8.2
+  geocoding: ^2.1.0
+  geolocator: ^10.1.0
 
 dev_dependencies:
   flutter_test:
